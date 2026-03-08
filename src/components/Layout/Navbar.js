@@ -8,15 +8,15 @@ const Navbar = () => {
       <nav className="topbar" aria-label="Primary">
         <div className="topbar-brand">
           <span className="brand-mark" aria-hidden="true">
-            CT
+            SC
           </span>
           <div className="brand-copy">
-            <strong>Crypto Tracker</strong>
+            <strong>SignalCrypt</strong>
             <span>Signal-driven market awareness</span>
           </div>
         </div>
 
-        <div className="topbar-actions">
+        <div className="topbar-aSCions">
           {isAuthenticated ? (
             <>
               <p className="topbar-user">

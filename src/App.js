@@ -45,7 +45,7 @@ const AppContent = () => {
       <Layout>
         <section className="auth-stage">
           <div className="auth-stage-copy enter-rise">
-            <p className="auth-stage-kicker">Crypto Tracker</p>
+            <p className="auth-stage-kicker">SignalCrypt</p>
             <h1>Trade with clearer context.</h1>
             <p>
               Monitor market movement, build a focused watchlist, and stay locked on the assets that
@@ -64,62 +64,62 @@ const AppContent = () => {
   }
 
   return (
-    <Layout>
-      <section className="dashboard-shell">
-        <header className="dashboard-hero enter-rise">
-          <p className="dashboard-kicker">Live Market Feed</p>
-          <h1>Premium Crypto Monitoring</h1>
-          <p className="dashboard-subtitle">
-            Real-time pricing, fast watchlist management, and clean signal-first visibility.
-          </p>
-        </header>
+    <CryptoProvider>
+      <Layout>
+        <section className="dashboard-shell">
+          <header className="dashboard-hero enter-rise">
+            <p className="dashboard-kicker">Live Market Feed</p>
+            <h1>Premium Crypto Monitoring</h1>
+            <p className="dashboard-subtitle">
+              Real-time pricing, fast watchlist management, and clean signal-first visibility.
+            </p>
+          </header>
 
-        {isMobile ? (
-          <section className="dashboard-mobile enter-rise delay-1" aria-label="Mobile dashboard sections">
-            <div className="dashboard-tabs" role="tablist" aria-label="Dashboard views">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === 'all'}
-                className={`dashboard-tab ${activeTab === 'all' ? 'is-active' : ''}`}
-                onClick={() => setActiveTab('all')}
-              >
-                Market
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === 'watchlist'}
-                className={`dashboard-tab ${activeTab === 'watchlist' ? 'is-active' : ''}`}
-                onClick={() => setActiveTab('watchlist')}
-              >
-                Watchlist
-              </button>
-            </div>
+          {isMobile ? (
+            <section className="dashboard-mobile enter-rise delay-1" aria-label="Mobile dashboard sections">
+              <div className="dashboard-tabs" role="tablist" aria-label="Dashboard views">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === 'all'}
+                  className={`dashboard-tab ${activeTab === 'all' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('all')}
+                >
+                  Market
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === 'watchlist'}
+                  className={`dashboard-tab ${activeTab === 'watchlist' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('watchlist')}
+                >
+                  Watchlist
+                </button>
+              </div>
 
-            <div className="dashboard-mobile-panel">{activeTab === 'all' ? <CryptoList /> : <Watchlist />}</div>
-          </section>
-        ) : (
-          <section className="dashboard-layout">
-            <div className="dashboard-main enter-rise delay-1">
-              <CryptoList />
-            </div>
-            <aside className="dashboard-aside enter-rise delay-2">
-              <Watchlist />
-            </aside>
-          </section>
-        )}
-      </section>
-    </Layout>
+              <div className="dashboard-mobile-panel">{activeTab === 'all' ? <CryptoList /> : <Watchlist />}</div>
+            </section>
+          ) : (
+            <section className="dashboard-layout">
+              <div className="dashboard-main enter-rise delay-1">
+                <CryptoList />
+              </div>
+              <aside className="dashboard-aside enter-rise delay-2">
+                <Watchlist />
+              </aside>
+            </section>
+          )}
+        </section>
+      </Layout>
+    </CryptoProvider>
   );
 };
 
 function App() {
   return (
     <AuthProvider>
-      <CryptoProvider>
-        <AppContent />
-      </CryptoProvider>
+      <AppContent />
     </AuthProvider>
   );
 }
