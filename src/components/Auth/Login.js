@@ -9,7 +9,7 @@ const Login = ({ onSwitchToRegister }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  const { login } = useAuth();
+  const { login, serverWarming } = useAuth();
 
   const handleChange = (event) => {
     setFormData((previous) => ({
@@ -71,7 +71,7 @@ const Login = ({ onSwitchToRegister }) => {
         </label>
 
         <button type="submit" disabled={loading} className="btn btn-primary auth-submit">
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? (serverWarming ? 'Waking server...' : 'Signing in...') : 'Sign in'}
         </button>
       </form>
 

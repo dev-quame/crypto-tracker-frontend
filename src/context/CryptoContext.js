@@ -38,7 +38,10 @@ export const CryptoProvider = ({ children }) => {
           setLoading(true);
         }
 
-        const response = await cryptoAPI.getTopCryptos();
+        const response = await cryptoAPI.getTopCryptos({
+          force: forceRefresh,
+          coldStart: !hasExistingData,
+        });
         const dataSource = response.headers?.['x-data-source'];
         const coins = Array.isArray(response.data) ? response.data : [];
         const isDegradedEmpty = coins.length === 0 && dataSource === 'degraded-empty';
@@ -130,12 +133,12 @@ export const CryptoProvider = ({ children }) => {
 
   const value = {
     allCryptos,
-      loading,
-      error,
-      marketDegraded,
-      refresh: () => fetchAllCryptos(true),
-      lastUpdated: lastFetchTime,
-    };
+    loading,
+    error,
+    marketDegraded,
+    refresh: () => fetchAllCryptos(true),
+    lastUpdated: lastFetchTime,
+  };
 
   useEffect(
     () => () => {

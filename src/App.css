@@ -747,6 +747,74 @@ body {
   color: var(--negative);
 }
 
+.scroll-top-rail {
+  position: fixed;
+  right: calc(0.95rem + env(safe-area-inset-right));
+  bottom: calc(0.95rem + env(safe-area-inset-bottom));
+  z-index: 95;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid rgba(166, 184, 202, 0.35);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(245, 158, 11, 0.96), rgba(217, 119, 6, 0.96));
+  color: #05120e;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  animation: railPulse 2.2s ease-in-out infinite;
+}
+
+.scroll-top-icon {
+  position: relative;
+  display: inline-block;
+  width: 15px;
+  height: 17px;
+  animation: arrowLift 1.2s ease-in-out infinite;
+}
+
+.scroll-top-icon::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 1px;
+  width: 8px;
+  height: 8px;
+  border-left: 3px solid #05120e;
+  border-top: 3px solid #05120e;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.scroll-top-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 3px;
+  height: 8px;
+  border-radius: 4px;
+  background: #05120e;
+  transform: translateX(-50%);
+}
+
+.scroll-top-rail:hover {
+  box-shadow: var(--shadow-strong);
+}
+
+.scroll-top-rail:hover .scroll-top-icon {
+  animation-play-state: paused;
+}
+
+.scroll-top-rail:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(7, 12, 20, 0.86),
+    0 0 0 5px rgba(245, 158, 11, 0.55);
+}
+
 .coin-card-skeleton,
 .watchlist-skeleton {
   overflow: hidden;
@@ -829,6 +897,26 @@ body {
   }
 }
 
+@keyframes arrowLift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes railPulse {
+  0%,
+  100% {
+    box-shadow: var(--shadow-soft);
+  }
+  50% {
+    box-shadow: 0 20px 34px rgba(217, 119, 6, 0.36);
+  }
+}
+
 @media (max-width: 1023px) {
   .app-main,
   .topbar {
@@ -856,22 +944,44 @@ body {
 
 @media (max-width: 780px) {
   .topbar {
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-wrap: nowrap;
+    justify-content: space-between;
     align-items: center;
-    padding: 0.8rem 0;
+    padding: 0.65rem 0;
     min-height: auto;
+    gap: 0.65rem;
   }
 
-  .topbar-brand,
+  .topbar-brand {
+    width: auto;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+  }
+
+  .brand-copy strong {
+    font-size: 0.96rem;
+  }
+
+  .brand-copy span {
+    display: none;
+  }
+
   .topbar-actions {
-    width: 100%;
-    justify-content: center;
+    width: auto;
+    justify-content: flex-end;
+    gap: 0.55rem;
   }
 
   .topbar-user,
   .topbar-note {
-    text-align: center;
+    display: none;
   }
 
   .dashboard-hero,
@@ -879,6 +989,27 @@ body {
   .watchlist-panel,
   .auth-card {
     border-radius: 16px;
+  }
+
+  .dashboard-hero {
+    padding: 1rem;
+  }
+
+  .dashboard-kicker {
+    margin-bottom: 0.45rem;
+    letter-spacing: 0.1em;
+    font-size: 0.66rem;
+  }
+
+  .dashboard-hero h1 {
+    font-size: clamp(1.25rem, 6vw, 1.65rem);
+    line-height: 1.15;
+  }
+
+  .dashboard-subtitle {
+    margin-top: 0.45rem;
+    font-size: 0.88rem;
+    line-height: 1.45;
   }
 
   .market-controls {
@@ -902,6 +1033,10 @@ body {
     width: calc(100% - 1.2rem);
   }
 
+  .app-main {
+    margin-top: 1.25rem;
+  }
+
   .coin-card,
   .watchlist-item {
     padding: 0.75rem;
@@ -909,6 +1044,14 @@ body {
 
   .coin-identity h3 {
     max-width: 120px;
+  }
+
+  .scroll-top-rail {
+    bottom: calc(0.85rem + env(safe-area-inset-bottom));
+    right: calc(0.75rem + env(safe-area-inset-right));
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
   }
 }
 

@@ -14,6 +14,10 @@ const AppContent = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [isMobile, setIsMobile] = useState(false);
 
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 1023px)');
 
@@ -111,6 +115,16 @@ const AppContent = () => {
             </section>
           )}
         </section>
+
+        <button
+          type="button"
+          className="scroll-top-rail"
+          onClick={handleScrollToTop}
+          aria-label="Back to top"
+          title="Back to top"
+        >
+          <span className="scroll-top-icon" aria-hidden="true" />
+        </button>
       </Layout>
     </CryptoProvider>
   );

@@ -1,6 +1,7 @@
 {
   "short_name": "SignalCrypt",
-  "name": "SignalCrypt",
+  "name": "SignalCrypt - Signal-Driven Crypto Market Awareness",
+  "description": "Signal-driven crypto market awareness with live prices and watchlists.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,7 +19,8 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#070c14",
   "background_color": "#070c14"
