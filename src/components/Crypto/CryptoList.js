@@ -5,9 +5,10 @@ import CryptoCard from './CryptoCard';
 const SKELETON_CARDS = Array.from({ length: 8 }, (_, index) => index);
 
 const CryptoList = () => {
-  const { allCryptos, loading, error, refresh, lastUpdated } = useCrypto();
+  const { allCryptos, loading, error, marketDegraded, refresh, lastUpdated } = useCrypto();
   const [searchTerm, setSearchTerm] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isAwaitingMarketData = marketDegraded && allCryptos.length === 0;
 
   const filteredCryptos = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -83,9 +84,13 @@ const CryptoList = () => {
         <div className="market-title-block">
           <p className="section-kicker">Market Overview</p>
           <h2>Top Cryptocurrencies</h2>
-          <p className="market-meta">
-            Showing {filteredCryptos.length} of {allCryptos.length} assets. Last update: {formattedUpdate}
-          </p>
+          {isAwaitingMarketData ? (
+            <p className="market-meta">Feed is syncing with the market provider. Retrying automatically...</p>
+          ) : (
+            <p className="market-meta">
+              Showing {filteredCryptos.length} of {allCryptos.length} assets. Last update: {formattedUpdate}
+            </p>
+          )}
         </div>
 
         <div className="market-controls">
@@ -111,9 +116,20 @@ const CryptoList = () => {
         </div>
       </header>
 
-      {filteredCryptos.length === 0 ? (
+      {isAwaitingMarketData ? (
+        <div className="status-card" aria-live="polite">
+          <p>Live market data is temporarily unavailable. We are retrying in the background.</p>
+          <button type="button" onClick={handleRefresh} className="btn btn-secondary">
+            Retry now
+          </button>
+        </div>
+      ) : filteredCryptos.length === 0 ? (
         <div className="status-card">
-          <p>No results for "{searchTerm}". Try another search term.</p>
+          <p>
+            {searchTerm
+              ? `No results for "${searchTerm}". Try another search term.`
+              : 'No assets available right now. Try refreshing in a moment.'}
+          </p>
         </div>
       ) : (
         <div className="crypto-grid">

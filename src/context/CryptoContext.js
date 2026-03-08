@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { cryptoAPI } from '../services/api';
 
 const CryptoContext = createContext();
@@ -15,21 +15,52 @@ export const CryptoProvider = ({ children }) => {
   const [allCryptos, setAllCryptos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [marketDegraded, setMarketDegraded] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState(0);
+  const allCryptosRef = useRef([]);
+  const degradedRetryTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    allCryptosRef.current = allCryptos;
+  }, [allCryptos]);
 
   const fetchAllCryptos = useCallback(
     async (forceRefresh = false) => {
       const now = Date.now();
+      const hasExistingData = allCryptosRef.current.length > 0;
 
       if (!forceRefresh && now - lastFetchTime < 5000) {
         return;
       }
 
       try {
-        setLoading(true);
-        const response = await cryptoAPI.getTopCryptos();
+        if (!hasExistingData) {
+          setLoading(true);
+        }
 
-        const transformedData = response.data.map((coin) => {
+        const response = await cryptoAPI.getTopCryptos();
+        const dataSource = response.headers?.['x-data-source'];
+        const coins = Array.isArray(response.data) ? response.data : [];
+        const isDegradedEmpty = coins.length === 0 && dataSource === 'degraded-empty';
+
+        if (isDegradedEmpty) {
+          setMarketDegraded(true);
+          setError('');
+          if (!degradedRetryTimeoutRef.current) {
+            degradedRetryTimeoutRef.current = setTimeout(() => {
+              degradedRetryTimeoutRef.current = null;
+              fetchAllCryptos(true);
+            }, 8000);
+          }
+          return;
+        }
+
+        if (degradedRetryTimeoutRef.current) {
+          clearTimeout(degradedRetryTimeoutRef.current);
+          degradedRetryTimeoutRef.current = null;
+        }
+
+        const transformedData = coins.map((coin) => {
           const priceChange = Number.isFinite(coin.price_change_percentage_24h)
             ? coin.price_change_percentage_24h
             : 0;
@@ -52,6 +83,7 @@ export const CryptoProvider = ({ children }) => {
         });
 
         setAllCryptos(transformedData);
+        setMarketDegraded(false);
         setError('');
         setLastFetchTime(now);
       } catch (fetchError) {
@@ -98,11 +130,21 @@ export const CryptoProvider = ({ children }) => {
 
   const value = {
     allCryptos,
-    loading,
-    error,
-    refresh: () => fetchAllCryptos(true),
-    lastUpdated: lastFetchTime,
-  };
+      loading,
+      error,
+      marketDegraded,
+      refresh: () => fetchAllCryptos(true),
+      lastUpdated: lastFetchTime,
+    };
+
+  useEffect(
+    () => () => {
+      if (degradedRetryTimeoutRef.current) {
+        clearTimeout(degradedRetryTimeoutRef.current);
+      }
+    },
+    []
+  );
 
   return <CryptoContext.Provider value={value}>{children}</CryptoContext.Provider>;
 };
