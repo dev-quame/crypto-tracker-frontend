@@ -1,9 +1,25 @@
 import axios from 'axios';
 
 const isProduction = process.env.NODE_ENV === 'production';
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL ||
-  (isProduction ? 'https://signalcrypt-api.onrender.com/api' : 'http://localhost:5000/api');
+const DEFAULT_API_BASE_URL = isProduction
+  ? 'https://signalcrypt-api.onrender.com/api'
+  : 'http://localhost:5000/api';
+
+const normalizeApiBaseUrl = (rawUrl) => {
+  const sanitized = String(rawUrl || '').trim().replace(/\/+$/, '');
+
+  if (!sanitized) {
+    return DEFAULT_API_BASE_URL;
+  }
+
+  if (sanitized.endsWith('/api')) {
+    return sanitized;
+  }
+
+  return `${sanitized}/api`;
+};
+
+const API_BASE_URL = normalizeApiBaseUrl(process.env.REACT_APP_API_BASE_URL || DEFAULT_API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
