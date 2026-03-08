@@ -1,142 +1,129 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useCrypto } from '../../context/CryptoContext';
 import CryptoCard from './CryptoCard';
 
-const CryptoList = () => {
-  const { allCryptos, loading, error, refresh } = useCrypto();
-  const [searchTerm, setSearchTerm] = useState('');
+const SKELETON_CARDS = Array.from({ length: 8 }, (_, index) => index);
 
-  // for the search functionality
-  const filteredCryptos = allCryptos.filter(crypto =>
-    crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+const CryptoList = () => {
+  const { allCryptos, loading, error, refresh, lastUpdated } = useCrypto();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const filteredCryptos = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return allCryptos;
+    }
+
+    return allCryptos.filter((crypto) => {
+      return (
+        crypto.name.toLowerCase().includes(normalizedSearch) ||
+        crypto.symbol.toLowerCase().includes(normalizedSearch)
+      );
+    });
+  }, [allCryptos, searchTerm]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 280);
+    }
+  };
 
   if (loading) {
     return (
-      <div style={styles.loading}>
-        <p>Loading cryptocurrency data...</p>
-      </div>
+      <section className="market-section" aria-live="polite">
+        <header className="market-header">
+          <div className="market-title-block">
+            <p className="section-kicker">Market Overview</p>
+            <h2>Top Cryptocurrencies</h2>
+            <p className="market-meta">Syncing live market feed...</p>
+          </div>
+        </header>
+        <div className="crypto-grid">
+          {SKELETON_CARDS.map((index) => (
+            <article key={`skeleton-${index}`} className="coin-card coin-card-skeleton" aria-hidden="true">
+              <div className="skeleton-line is-wide" />
+              <div className="skeleton-line is-mid" />
+              <div className="skeleton-line is-mid" />
+              <div className="skeleton-line is-small" />
+            </article>
+          ))}
+        </div>
+      </section>
     );
   }
 
   if (error) {
     return (
-      <div style={styles.error}>
+      <section className="status-card is-error" aria-live="assertive">
         <p>{error}</p>
-        <button onClick={refresh} style={styles.retryBtn}>
+        <button type="button" onClick={handleRefresh} className="btn btn-primary">
           Retry
         </button>
-      </div>
+      </section>
     );
   }
 
+  const formattedUpdate =
+    lastUpdated > 0
+      ? new Intl.DateTimeFormat(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        }).format(lastUpdated)
+      : 'Waiting for first sync';
+
   return (
-    <div>
-      <header style={styles.header}>
-        <h2 style={styles.headerTitle}>Top Cryptocurrencies</h2>
-        <div style={styles.controls}>
-          <input
-            type="text"
-            placeholder="Search cryptocurrencies..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={styles.searchInput}
-          />
-          <button onClick={refresh} style={styles.refreshBtn}>
-            Refresh
+    <section className="market-section">
+      <header className="market-header">
+        <div className="market-title-block">
+          <p className="section-kicker">Market Overview</p>
+          <h2>Top Cryptocurrencies</h2>
+          <p className="market-meta">
+            Showing {filteredCryptos.length} of {allCryptos.length} assets. Last update: {formattedUpdate}
+          </p>
+        </div>
+
+        <div className="market-controls">
+          <label className="search-field" htmlFor="crypto-search">
+            <span className="sr-only">Search coins</span>
+            <input
+              id="crypto-search"
+              type="text"
+              placeholder="Search by name or symbol"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className={`btn btn-secondary ${isRefreshing ? 'is-busy' : ''}`}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? 'Refreshing...' : 'Refresh prices'}
           </button>
         </div>
       </header>
 
-      <main style={styles.grid}>
-        {filteredCryptos.map((crypto) => (
-          <CryptoCard key={crypto.id} crypto={crypto} />
-        ))}
-      </main>
-
-      {filteredCryptos.length === 0 && (
-        <div style={styles.noResults}>
-          <p>No cryptocurrencies found matching "{searchTerm}"</p>
+      {filteredCryptos.length === 0 ? (
+        <div className="status-card">
+          <p>No results for "{searchTerm}". Try another search term.</p>
+        </div>
+      ) : (
+        <div className="crypto-grid">
+          {filteredCryptos.map((crypto, index) => (
+            <CryptoCard key={crypto.id} crypto={crypto} index={index} />
+          ))}
         </div>
       )}
-    </div>
+    </section>
   );
-};
-
-const styles = {
-  loading: {
-    textAlign: 'center',
-    padding: '2rem',
-    color: '#00d4aa',
-  },
-  error: {
-    textAlign: 'center',
-    padding: '2rem',
-    color: '#ff4444',
-  },
-  retryBtn: {
-    marginTop: '1rem',
-    padding: '0.5rem 1rem',
-    backgroundColor: '#00d4aa',
-    color: 'black',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1.5rem',
-    flexWrap: 'wrap',
-    gap: '1rem',
-    maxWidth: '100%',
-    overflowX: 'auto',
-    position: 'sticky',
-    top: 0,
-    backgroundColor: '#1a1a1a',
-    padding: '1rem 0',
-    zIndex: 500,
-  },
-  headerTitle: {
-    margin: 0,
-    paddingInline: '.5rem',
-  },
-  controls: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center',
-  },
-  searchInput: {
-    padding: '0.75rem',
-    borderRadius: '6px',
-    border: '1px solid #444',
-    backgroundColor: '#2a2a2a',
-    color: 'white',
-    minWidth: '250px',
-    fontSize: '1rem',
-  },
-  refreshBtn: {
-    padding: '0.75rem 1rem',
-    backgroundColor: '#333',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '0.9rem',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '1.5rem',
-  },
-  noResults: {
-    textAlign: 'center',
-    padding: '3rem',
-    color: '#888',
-    fontSize: '1.1rem',
-  },
 };
 
 export default CryptoList;

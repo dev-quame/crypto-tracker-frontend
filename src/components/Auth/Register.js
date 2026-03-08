@@ -13,29 +13,28 @@ const Register = ({ onSwitchToLogin }) => {
 
   const { register } = useAuth();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (event) => {
+    setFormData((previous) => ({
+      ...previous,
+      [event.target.name]: event.target.value,
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Client side validation
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     if (formData.username.trim().length < 3) {
-      setMessage('Username must be at least 3 characters');
+      setMessage('Username must be at least 3 characters.');
       return;
     }
 
     if (formData.password.length < 6) {
-      setMessage('Password must be at least 6 characters');
+      setMessage('Password must be at least 6 characters.');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setMessage('Passwords do not match');
+      setMessage('Passwords do not match.');
       return;
     }
 
@@ -45,136 +44,97 @@ const Register = ({ onSwitchToLogin }) => {
     const result = await register(formData.username, formData.email, formData.password);
 
     if (result.success) {
-      setMessage('Registration successful! Redirecting...');
+      setMessage('Registration successful. Building your workspace...');
     } else {
       setMessage(result.error);
     }
+
     setLoading(false);
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.headerMB}>Join Crypto Tracker</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
-        <button 
-          type="submit" 
-          disabled={loading}
-          style={styles.button}
-        >
-          {loading ? 'Creating Account...' : 'Register'}
+    <article className="auth-card enter-rise delay-1" aria-label="Register">
+      <div className="auth-card-head">
+        <h2>Create account</h2>
+        <p>Start tracking assets with your own watchlist.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="auth-form">
+        <label className="field-group" htmlFor="register-username">
+          <span>Username</span>
+          <input
+            id="register-username"
+            type="text"
+            name="username"
+            placeholder="Trading handle"
+            value={formData.username}
+            onChange={handleChange}
+            autoComplete="username"
+            required
+          />
+        </label>
+
+        <label className="field-group" htmlFor="register-email">
+          <span>Email</span>
+          <input
+            id="register-email"
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            value={formData.email}
+            onChange={handleChange}
+            autoComplete="email"
+            required
+          />
+        </label>
+
+        <label className="field-group" htmlFor="register-password">
+          <span>Password</span>
+          <input
+            id="register-password"
+            type="password"
+            name="password"
+            placeholder="At least 6 characters"
+            value={formData.password}
+            onChange={handleChange}
+            autoComplete="new-password"
+            required
+          />
+        </label>
+
+        <label className="field-group" htmlFor="register-confirm-password">
+          <span>Confirm password</span>
+          <input
+            id="register-confirm-password"
+            type="password"
+            name="confirmPassword"
+            placeholder="Repeat password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            autoComplete="new-password"
+            required
+          />
+        </label>
+
+        <button type="submit" disabled={loading} className="btn btn-primary auth-submit">
+          {loading ? 'Creating account...' : 'Create account'}
         </button>
       </form>
-      
+
       {message && (
-        <p style={message.includes('successful') ? styles.success : styles.error}>
+        <p className={`auth-message ${message.toLowerCase().includes('successful') ? 'is-success' : 'is-error'}`}>
           {message}
         </p>
       )}
-      
-      <p style={styles.switchText}>
-        Already have an account?{' '}
-        <span 
-          style={styles.switchLink} 
-          onClick={onSwitchToLogin}
-        >
-          Login here
-        </span>
-      </p>
-    </div>
-  );
-};
 
-const styles = {
-  container: {
-    maxWidth: '400px',
-    margin: '2rem auto',
-    padding: '2rem',
-    backgroundColor: '#1a1a1a',
-    borderRadius: '8px',
-    border: '1px solid #333',
-  },
-  headerMB: {
-    marginBottom: '1.5rem',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  },
-  input: {
-    padding: '0.75rem',
-    borderRadius: '4px',
-    border: '1px solid #444',
-    backgroundColor: '#2a2a2a',
-    color: 'white',
-    fontSize: '1rem',
-  },
-  button: {
-    padding: '0.75rem',
-    backgroundColor: '#00d4aa',
-    color: 'black',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '1rem',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-  },
-  success: {
-    color: '#00d4aa',
-    textAlign: 'center',
-    marginTop: '1rem',
-  },
-  error: {
-    color: '#ff4444',
-    textAlign: 'center',
-    marginTop: '1rem',
-  },
-  switchText: {
-    textAlign: 'center',
-    marginTop: '1rem',
-    color: '#888',
-  },
-  switchLink: {
-    color: '#00d4aa',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-  },
+      <p className="auth-switch">
+        Already have an account?{' '}
+        <button type="button" onClick={onSwitchToLogin} className="link-button">
+          Sign in
+        </button>
+      </p>
+    </article>
+  );
 };
 
 export default Register;

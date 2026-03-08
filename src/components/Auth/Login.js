@@ -11,133 +11,84 @@ const Login = ({ onSwitchToRegister }) => {
 
   const { login } = useAuth();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (event) => {
+    setFormData((previous) => ({
+      ...previous,
+      [event.target.name]: event.target.value,
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setMessage('');
 
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      setMessage('Login successful! Redirecting...');
+      setMessage('Login successful. Preparing your dashboard...');
     } else {
       setMessage(result.error);
     }
+
     setLoading(false);
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.headerMB}>Login to Crypto Tracker</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
-        <button 
-          type="submit" 
-          disabled={loading}
-          style={styles.button}
-        >
-          {loading ? 'Logging in...' : 'Login'}
+    <article className="auth-card enter-rise delay-1" aria-label="Login">
+      <div className="auth-card-head">
+        <h2>Welcome back</h2>
+        <p>Sign in to continue tracking market movement.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="auth-form">
+        <label className="field-group" htmlFor="login-email">
+          <span>Email</span>
+          <input
+            id="login-email"
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            value={formData.email}
+            onChange={handleChange}
+            autoComplete="email"
+            required
+          />
+        </label>
+
+        <label className="field-group" htmlFor="login-password">
+          <span>Password</span>
+          <input
+            id="login-password"
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
+            autoComplete="current-password"
+            required
+          />
+        </label>
+
+        <button type="submit" disabled={loading} className="btn btn-primary auth-submit">
+          {loading ? 'Signing in...' : 'Sign in'}
         </button>
       </form>
-      
+
       {message && (
-        <p style={message.includes('successful') ? styles.success : styles.error}>
+        <p className={`auth-message ${message.toLowerCase().includes('successful') ? 'is-success' : 'is-error'}`}>
           {message}
         </p>
       )}
-      
-      <p style={styles.switchText}>
-        Don't have an account?{' '}
-        <span 
-          style={styles.switchLink} 
-          onClick={onSwitchToRegister}
-        >
-          Register here
-        </span>
-      </p>
-    </div>
-  );
-};
 
-const styles = {
-  container: {
-    maxWidth: '400px',
-    margin: '2rem auto',
-    padding: '2rem',
-    backgroundColor: '#1a1a1a',
-    borderRadius: '8px',
-    border: '1px solid #333',
-  },
-  headerMB: {
-    marginBottom: '1.5rem',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  },
-  input: {
-    padding: '0.75rem',
-    borderRadius: '4px',
-    border: '1px solid #444',
-    backgroundColor: '#2a2a2a',
-    color: 'white',
-    fontSize: '1rem',
-  },
-  button: {
-    padding: '0.75rem',
-    backgroundColor: '#00d4aa',
-    color: 'black',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '1rem',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-  },
-  success: {
-    color: '#00d4aa',
-    textAlign: 'center',
-    marginTop: '1rem',
-  },
-  error: {
-    color: '#ff4444',
-    textAlign: 'center',
-    marginTop: '1rem',
-  },
-  switchText: {
-    textAlign: 'center',
-    marginTop: '1rem',
-    color: '#888',
-  },
-  switchLink: {
-    color: '#00d4aa',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-  },
+      <p className="auth-switch">
+        New here?{' '}
+        <button type="button" onClick={onSwitchToRegister} className="link-button">
+          Create an account
+        </button>
+      </p>
+    </article>
+  );
 };
 
 export default Login;

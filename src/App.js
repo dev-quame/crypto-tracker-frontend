@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CryptoProvider } from './context/CryptoContext';
 import Layout from './components/Layout/Layout';
@@ -11,26 +11,31 @@ import './App.css';
 const AppContent = () => {
   const { isAuthenticated, loading } = useAuth();
   const [authView, setAuthView] = useState('login');
-  const [activeTab, setActiveTab] = useState('all'); 
+  const [activeTab, setActiveTab] = useState('all');
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024); 
+    const mediaQuery = window.matchMedia('(max-width: 1023px)');
+
+    const handleViewportChange = (event) => {
+      setIsMobile(event.matches);
     };
 
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    setIsMobile(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleViewportChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleViewportChange);
+    };
   }, []);
 
   if (loading) {
     return (
       <Layout>
-        <div style={styles.loading}>
-          <div style={styles.spinner}></div>
-          <p>Loading Crypto Tracker...</p>
-        </div>
+        <section className="app-loading" aria-live="polite">
+          <div className="app-loading-spinner" aria-hidden="true" />
+          <p className="app-loading-copy">Loading your dashboard...</p>
+        </section>
       </Layout>
     );
   }
@@ -38,61 +43,73 @@ const AppContent = () => {
   if (!isAuthenticated) {
     return (
       <Layout>
-        {authView === 'login' ? (
-          <Login onSwitchToRegister={() => setAuthView('register')} />
-        ) : (
-          <Register onSwitchToLogin={() => setAuthView('login')} />
-        )}
+        <section className="auth-stage">
+          <div className="auth-stage-copy enter-rise">
+            <p className="auth-stage-kicker">Crypto Tracker</p>
+            <h1>Trade with clearer context.</h1>
+            <p>
+              Monitor market movement, build a focused watchlist, and stay locked on the assets that
+              matter most to your strategy.
+            </p>
+          </div>
+
+          {authView === 'login' ? (
+            <Login onSwitchToRegister={() => setAuthView('register')} />
+          ) : (
+            <Register onSwitchToLogin={() => setAuthView('login')} />
+          )}
+        </section>
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <div style={styles.dashboard}>
-        <div style={styles.header}>
-          <h1>🚀 Crypto Tracker</h1>
-          <p style={styles.subtitle}>Real-time cryptocurrency prices and tracking</p>
-        </div>
+      <section className="dashboard-shell">
+        <header className="dashboard-hero enter-rise">
+          <p className="dashboard-kicker">Live Market Feed</p>
+          <h1>Premium Crypto Monitoring</h1>
+          <p className="dashboard-subtitle">
+            Real-time pricing, fast watchlist management, and clean signal-first visibility.
+          </p>
+        </header>
 
         {isMobile ? (
-          <div style={styles.mobileView}>
-            <div style={styles.tabContainer}>
+          <section className="dashboard-mobile enter-rise delay-1" aria-label="Mobile dashboard sections">
+            <div className="dashboard-tabs" role="tablist" aria-label="Dashboard views">
               <button
-                style={{
-                  ...styles.tabButton,
-                  ...(activeTab === 'all' ? styles.activeTab : {})
-                }}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'all'}
+                className={`dashboard-tab ${activeTab === 'all' ? 'is-active' : ''}`}
                 onClick={() => setActiveTab('all')}
               >
-                All Coins
+                Market
               </button>
               <button
-                style={{
-                  ...styles.tabButton,
-                  ...(activeTab === 'watchlist' ? styles.activeTab : {})
-                }}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'watchlist'}
+                className={`dashboard-tab ${activeTab === 'watchlist' ? 'is-active' : ''}`}
                 onClick={() => setActiveTab('watchlist')}
               >
                 Watchlist
               </button>
             </div>
-            
-            <div style={styles.mobileContent}>
-              {activeTab === 'all' ? <CryptoList /> : <Watchlist />}
-            </div>
-          </div>
+
+            <div className="dashboard-mobile-panel">{activeTab === 'all' ? <CryptoList /> : <Watchlist />}</div>
+          </section>
         ) : (
-          <div style={styles.content}>
-            <div style={styles.mainContent}>
+          <section className="dashboard-layout">
+            <div className="dashboard-main enter-rise delay-1">
               <CryptoList />
             </div>
-            <div style={styles.sidebar}>
+            <aside className="dashboard-aside enter-rise delay-2">
               <Watchlist />
-            </div>
-          </div>
+            </aside>
+          </section>
         )}
-      </div>
+      </section>
     </Layout>
   );
 };
@@ -106,93 +123,5 @@ function App() {
     </AuthProvider>
   );
 }
-
-const styles = {
-  loading: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '50vh',
-    color: '#00d4aa',
-  },
-  spinner: {
-    border: '4px solid #333',
-    borderTop: '4px solid #00d4aa',
-    borderRadius: '50%',
-    width: '50px',
-    height: '50px',
-    animation: 'spin 1s linear infinite',
-    marginBottom: '1rem',
-  },
-  dashboard: {
-    minHeight: '100vh',
-  },
-  header: {
-    textAlign: 'center',
-    marginBottom: '2rem',
-  },
-  subtitle: {
-    color: '#888',
-    marginTop: '0.5rem',
-  },
-
-  content: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 350px',
-    gap: '2rem',
-    alignItems: 'start',
-  },
-  mainContent: {
-    minWidth: 0,
-  },
-  sidebar: {
-    position: 'sticky',
-    top: '5.5rem',
-    height: 'calc(100vh - 7rem)',
-    overflowY: 'auto',
-  },
-
-  mobileView: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  },
-  tabContainer: {
-    display: 'flex',
-    backgroundColor: '#1a1a1a',
-    borderRadius: '8px',
-    padding: '0.25rem',
-    marginBottom: '1rem',
-  },
-  tabButton: {
-    flex: 1,
-    padding: '0.75rem 1rem',
-    border: 'none',
-    backgroundColor: 'transparent',
-    color: '#888',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    borderRadius: '6px',
-    transition: 'all 0.2s ease',
-  },
-  activeTab: {
-    backgroundColor: '#00d4aa',
-    color: '#0a0a0a',
-  },
-  mobileContent: {
-    minHeight: '60vh',
-  },
-};
-
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default App;

@@ -1,61 +1,38 @@
 import { useAuth } from '../../context/AuthContext';
-import '../../App.css';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
 
   return (
-    <nav style={styles.navbar}>
-      <div style={styles.logo}>
-        <h2>🚀 <span className="logo-text">Crypto Tracker</span></h2>
-      </div>
-      
-      <div style={styles.navLinks}>
-        {isAuthenticated ? (
-          <>
-            <span style={styles.welcome}>Welcome, {user?.username}!</span>
-            <button onClick={logout} style={styles.logoutBtn}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <span>Please login to track cryptos</span>
-        )}
-      </div>
-    </nav>
-  );
-};
+    <header className="topbar-wrap">
+      <nav className="topbar" aria-label="Primary">
+        <div className="topbar-brand">
+          <span className="brand-mark" aria-hidden="true">
+            CT
+          </span>
+          <div className="brand-copy">
+            <strong>Crypto Tracker</strong>
+            <span>Signal-driven market awareness</span>
+          </div>
+        </div>
 
-const styles = {
-  navbar: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '1rem 2rem',
-    backgroundColor: '#1a1a1a',
-    color: 'white',
-    borderBottom: '2px solid #333',
-  },
-  logo: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-  },
-  navLinks: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-  },
-  welcome: {
-    color: '#00d4aa',
-  },
-  logoutBtn: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#ff4444',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-  },
+        <div className="topbar-actions">
+          {isAuthenticated ? (
+            <>
+              <p className="topbar-user">
+                Signed in as <span>{user?.username}</span>
+              </p>
+              <button type="button" onClick={logout} className="btn btn-ghost">
+                Sign out
+              </button>
+            </>
+          ) : (
+            <p className="topbar-note">Sign in to personalize your watchlist.</p>
+          )}
+        </div>
+      </nav>
+    </header>
+  );
 };
 
 export default Navbar;
